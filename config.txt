@@ -1,2 +1,3 @@
-username: @gmail.com
-password:
+# warning: do not change the format of this file!
+username: arjunsrivastava01@gmail.com
+password: arjunator2
