@@ -2,7 +2,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import requests, time, random
 from bs4 import BeautifulSoup
-
+# TODO: Add Sales Navigator Functionality?
 
 def main():
     # Setting up browser
@@ -15,6 +15,8 @@ def main():
     username = lines[1].split()[1]
     password = lines[2].split()[1]
 
+
+
     # Submits username and password keys
     element_id = browser.find_element_by_id('username')  # Using username input id
     element_id.send_keys(username)
@@ -24,15 +26,18 @@ def main():
 
     # Initial search
     search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using search bar xpath
-    search.send_keys('Tamarah Zimek')
+    search.send_keys('google')
     browser.find_element_by_css_selector("button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
-    time.sleep(10)
+    time.sleep(4)
+    result = browser.find_element_by_id('o/T1Vz8aTFeVomr4TdsRhQ==')
+    link = result.get_attribute('href')
+    browser.get(link)
+
+
+
 
     # TODO: implement Scraper class, multi-query, etc.
 
-    # Get info from given link
-    link = 'https://www.linkedin.com/in/arjun-srivastava042701/'
-    browser.get(link)
 
 
 if __name__ == '__main__':
