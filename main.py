@@ -23,10 +23,12 @@ def main():
     element_id.send_keys(password)
     element_id.submit()
 
-    # Search functionality
+    # Initial search NOT WORKING RIGHT NOW
     search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using xpath of LinkedIn search bar
+    search.click()
     search.send_keys('apple')
     search.submit()
+    time.sleep(5)
 
 
 if __name__ == '__main__':
