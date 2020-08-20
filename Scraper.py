@@ -3,6 +3,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests, time, random
 from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
+
+
 # TODO: IMPLEMENT SALES NAV
 
 class Scraper:
@@ -27,12 +29,12 @@ class Scraper:
         config.close()
 
         # Submits username and password keys
-        element = self.browser.find_element_by_id('username')  # Using username input id
-        element.send_keys(username)
-        element = self.browser.find_element_by_id('password')  # Using password input id
-        element.send_keys(password)
+        element_id = self.browser.find_element_by_id('username')  # Using username input id
+        element_id.send_keys(username)
+        element_id = self.browser.find_element_by_id('password')  # Using password input id
+        element_id.send_keys(password)
 
-        element.submit()
+        # element_id.submit()
 
         self.search()
 
@@ -45,6 +47,6 @@ class Scraper:
         self.browser.find_element_by_css_selector(
             "button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
         time.sleep(5)
-        result = self.browser.find_element_by_id('ember9183')  # Finds first search result (MAKE MORE EFFECTIVE)
+        result = self.browser.find_element_by_class_name('search-result__result-link ember-view')  # Finds first search result (MAKE MORE EFFECTIVE)
         link = result.get_attribute('href')
         self.browser.get(link)

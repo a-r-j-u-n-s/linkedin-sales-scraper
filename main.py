@@ -2,7 +2,7 @@ from Scraper import Scraper
 
 
 def main():
-    scraper = Scraper('google', 10, [], [])
+    scraper = Scraper('apple', 10, [], [])
     scraper.run()
 
 
