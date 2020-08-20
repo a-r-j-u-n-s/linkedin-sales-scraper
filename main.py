@@ -6,11 +6,11 @@ from bs4 import BeautifulSoup
 
 def main():
 
-    # FIX PATH: todo for chromedriver?
+    # Setting up browser
     browser = webdriver.Chrome(ChromeDriverManager().install())
-
-    # Retrieves username and password
     browser.get('https://www.linkedin.com/uas/login')
+
+    # Retrieves username and password from config.txt
     config = open('config.txt')
     lines = config.readlines()
     username = lines[1].split()[1]
@@ -24,7 +24,7 @@ def main():
     element_id.submit()
 
     # Search functionality
-    search = browser.find_element_by_xpath("//input[@aria-label='Search']")
+    search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using xpath of LinkedIn search bar
     search.send_keys('apple')
     search.submit()
 
