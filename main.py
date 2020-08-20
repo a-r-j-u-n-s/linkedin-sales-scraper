@@ -24,7 +24,7 @@ def main():
 
     # Initial search
     search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using search bar xpath
-    search.send_keys('Gabrielle Sprunck')
+    search.send_keys('Tamarah Zimek')
     browser.find_element_by_css_selector("button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
     time.sleep(10)
 
