@@ -17,18 +17,17 @@ def main():
     password = lines[2].split()[1]
 
     # Submits username and password keys
-    element_id = browser.find_element_by_id('username')
+    element_id = browser.find_element_by_id('username')  # Using username input id
     element_id.send_keys(username)
-    element_id = browser.find_element_by_id('password')
+    element_id = browser.find_element_by_id('password')  # Using password input id
     element_id.send_keys(password)
     element_id.submit()
 
-    # Initial search NOT WORKING RIGHT NOW
-    search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using xpath of LinkedIn search bar
-    search.click()
-    search.send_keys('apple')
-    search.submit()
-    time.sleep(5)
+    # Initial search
+    search = browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using search bar xpath
+    search.send_keys('Gabrielle Sprunck')
+    browser.find_element_by_css_selector("button[class='search-global-typeahead__button']").click()  # Using search button class name
+    time.sleep(10)
 
 
 if __name__ == '__main__':
