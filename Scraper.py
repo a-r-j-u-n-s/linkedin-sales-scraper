@@ -24,8 +24,8 @@ class Scraper:
         # Retrieves username and password from config.txt
         config = open('config.txt')
         lines = config.readlines()
-        username = lines[1].split(':')[1]
-        password = lines[2].split(':')[1]
+        username = lines[3].split(':')[1]
+        password = lines[4].split(':')[1]
         config.close()
 
         # Submits username and password keys
@@ -34,8 +34,9 @@ class Scraper:
         element_id = self.browser.find_element_by_id('password')  # Using password input id
         element_id.send_keys(password)
 
-        # element_id.submit()
+        # element_id.submit()  CAUSING STALE ELEMENT ERROR
 
+        # Search and access 'People' tab for given company
         self.search()
 
         self.browser.quit()  # Close Chrome browser
