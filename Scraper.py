@@ -1,28 +1,34 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-import requests, time, random
-from selenium.common.exceptions import WebDriverException
+import pandas as pd
+import requests, time, random, lxml, csv
 from bs4 import BeautifulSoup
+
+__all__ = ['Scraper']
 
 
 # TODO: IMPLEMENT SALES NAV
 
 class Scraper:
-    def __init__(self, company_name: str, results: int, keywords: list, to_ignore: list):
+    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False):
         """
         Initializes Scraper
         :param company_name: Company in which to search
-        :param results: max number of accounts to scrape within company
+        :param count: max number of accounts to scrape within company
         :param keywords: key words relevant to job titles
         :param to_ignore: words to ignore in job titles
         """
         self.company_name = company_name
-        self.results = results
+        self.count = count
         self.keywords = keywords
         self.to_ignore = to_ignore
+        self._results = pd.DataFrame(
+            columns=['First Name', 'Last Name', 'Title', 'Company', 'Location'])  # .csv file for results
+        # TODO: ADD EMAIL GUESSER
 
-        # Setting up browser
-        self.browser = webdriver.Chrome(ChromeDriverManager().install())
+        self._outfile = open("accounts_scrape.csv", "w", newline='')
+        self._csv_writer = csv.writer(self._outfile)
+        self._browser = webdriver.Chrome(ChromeDriverManager().install())  # Set up browser
 
     def run(self):
         """
@@ -30,7 +36,7 @@ class Scraper:
         :return:
         """
         # Get login page
-        self.browser.get('https://www.linkedin.com/uas/login')
+        self._browser.get('https://www.linkedin.com/uas/login')
 
         # Retrieves username and password from config.txt
         config = open('config.txt')
@@ -40,27 +46,27 @@ class Scraper:
         config.close()
 
         # Submits username and password keys
-        element_id = self.browser.find_element_by_id('username')  # Using username input id
+        element_id = self._browser.find_element_by_id('username')  # Using username input id
         element_id.send_keys(username)
-        element_id = self.browser.find_element_by_id('password')  # Using password input id
+        element_id = self._browser.find_element_by_id('password')  # Using password input id
         element_id.send_keys(password)
 
-        # element_id.submit()  CAUSING STALE ELEMENT ERROR
+        # element_id.submit()  CAUSES STALE ELEMENT ERROR
 
         # Search and access 'People' tab for given company
         self.search()
 
-        self.browser.quit()  # Close Chrome browser
+        self._outfile.close()
+        self._browser.quit()  # Close Chrome browser
 
     def search(self):
         """
-
-        :return:
+        Access employees of chosen company
         """
         # Initial search
-        search = self.browser.find_element_by_xpath("//input[@aria-label='Search']")  # Using search bar xpath
+        search = self._browser.find_element_by_xpath("//input[@aria-label='Search']")  # Find elem w search bar xpath
         search.send_keys(self.company_name)
-        self.browser.find_element_by_css_selector(
+        self._browser.find_element_by_css_selector(
             "button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
 
         # time.sleep(5)
@@ -68,12 +74,38 @@ class Scraper:
         # link = result.get_attribute('href')
         # self.browser.get(link)
 
-        # FOR TESTING PURPOSES: SCRAPING INFO FROM THE PROFILE
-        link = self.browser.get('https://www.linkedin.com/in/arjun-srivastava042701/')
-        height = self.browser.execute_script("return document.documentElement.scrollHeight")  #maybe change to body
-        test_height = self.browser.execute_script("return document.body.scrollHeight")  # maybe change to body
-        print(height, test_height)
 
+        # Scrape individual profile
+        self.scrape_profile('https://www.linkedin.com/in/krishan-weber-96a194164/')
 
+    def scrape_profile(self, link: str):
+        """
+        Scrapes profile and adds information to results file
+        :param link: profile link
+        """
+        self._browser.get(link)
 
+        height = self._browser.execute_script("return document.documentElement.scrollHeight")  # Maybe use body?
+
+        self._browser.execute_script(
+            "window.scrollTo(0, document.documentElement.scrollHeight);")  # Scrolls to bottom of page
+
+        # Parse with BeautifulSoup and lxml
+        src = self._browser.page_source
+        soup = BeautifulSoup(src, 'lxml')
+
+        # Get personal info
+        personal_info_div = soup.find(name='div', attrs={'class': 'flex-1 mr5'})
+        info_loc = personal_info_div.find_all(name='ul')
+        names = info_loc[0].find('li').text.strip().split()  # First and last name
+        job_info = personal_info_div.find('h2').text.strip().split(' at ')  # Job title and company
+        location = info_loc[1].find_next('li').text.strip()  # Location
+
+        # Create and append new data to .csv
+        account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
+                                    columns=self._results.columns)
+        self._results = self._results.append(account_info, True)
+
+        # Save profile information to .csv file
+        self._results.to_csv('accounts_scrape.csv')
 
