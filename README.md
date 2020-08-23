@@ -1,5 +1,5 @@
 # linkedin-sales-scraper
-**LinkedinScraper** is a sales web scraping bot that generates relevant leads/accounts for companies of your choice based on data from [LinkedIn](https://www.linkedin.com/feed/) and saves their information.
+**LinkedinScraper** is a sales web scraping bot that generates relevant leads/accounts for companies of your choice based on data from [LinkedIn](https://www.linkedin.com/feed/) and saves the results to a .csv file.
 
 ## Dependencies
 *Requires Python 3.7 or later*
