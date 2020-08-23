@@ -1,7 +1,7 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
-import requests, time, random, lxml, csv
+import requests, time, lxml, csv
 from bs4 import BeautifulSoup
 
 __all__ = ['LinkedinScraper']
@@ -10,6 +10,9 @@ __all__ = ['LinkedinScraper']
 # TODO: IMPLEMENT SALES NAV, fix middle name
 
 class LinkedinScraper:
+    """
+    Sales web scraping bot to generate relevant leads/accounts from LinkedIn
+    """
     def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False):
         """
         Initializes Scraper
@@ -73,7 +76,6 @@ class LinkedinScraper:
         # result = self.browser.find_element_by_class_name('search-result__result-link ember-view')  # Finds first search result (MAKE MORE EFFECTIVE)
         # link = result.get_attribute('href')
         # self.browser.get(link)
-
 
         # Scrape individual profile
         self.scrape_profile('https://www.linkedin.com/in/ravina-dalamal-mirapuri-6b83a16/')
