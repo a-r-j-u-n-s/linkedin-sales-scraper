@@ -4,12 +4,12 @@ import pandas as pd
 import requests, time, random, lxml, csv
 from bs4 import BeautifulSoup
 
-__all__ = ['Scraper']
+__all__ = ['LinkedinScraper']
 
 
-# TODO: IMPLEMENT SALES NAV
+# TODO: IMPLEMENT SALES NAV, fix middle name
 
-class Scraper:
+class LinkedinScraper:
     def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False):
         """
         Initializes Scraper
@@ -76,7 +76,8 @@ class Scraper:
 
 
         # Scrape individual profile
-        self.scrape_profile('https://www.linkedin.com/in/krishan-weber-96a194164/')
+        self.scrape_profile('https://www.linkedin.com/in/ravina-dalamal-mirapuri-6b83a16/')
+
 
     def scrape_profile(self, link: str):
         """

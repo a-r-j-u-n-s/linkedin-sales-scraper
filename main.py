@@ -1,8 +1,8 @@
-from Scraper import Scraper
+from LinkedinScraper import LinkedinScraper
 
 
 def main():
-    scraper = Scraper('Krishan Weber', 10, [], [])
+    scraper = LinkedinScraper('Ravina Mirapuri', 10, [], [])
     scraper.run()
 
 
