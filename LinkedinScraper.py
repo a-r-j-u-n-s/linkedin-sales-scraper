@@ -133,7 +133,7 @@ class LinkedinScraper:
         search_results = self._browser.find_element_by_xpath('//*[@class="r"]/a[1]')
         link = search_results.get_attribute('href')
         self._browser.get(link)
-        return None
+        return 'None'
 
 
 
