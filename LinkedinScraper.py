@@ -1,5 +1,6 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import requests, time, lxml, csv
 from bs4 import BeautifulSoup
@@ -27,11 +28,16 @@ class LinkedinScraper:
         self.to_ignore = to_ignore
         self._results = pd.DataFrame(
             columns=['First Name', 'Last Name', 'Title', 'Company', 'Location'])  # .csv file for results
-        # TODO: ADD EMAIL GUESSER
 
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)
         self._browser = webdriver.Chrome(ChromeDriverManager().install())  # Set up browser
+
+        # If guess_email, find email format
+        if guess_email:
+            self._email_format = self.guess_email_format()
+        else:
+            self._email_format = None
 
     def run(self):
         """
@@ -80,7 +86,6 @@ class LinkedinScraper:
         # Scrape individual profile
         self.scrape_profile('https://www.linkedin.com/in/ravina-dalamal-mirapuri-6b83a16/')
 
-
     def scrape_profile(self, link: str):
         """
         Scrapes profile and adds information to results file
@@ -111,4 +116,24 @@ class LinkedinScraper:
 
         # Save profile information to .csv file
         self._results.to_csv('accounts_scrape.csv')
+
+    def guess_email_format(self):
+        """
+        Guesses the email format of the given company based on Rocketreach results
+        :return: email format
+        """
+        self._browser.get('https://www.google.com/')
+
+        # Search for Rocketreach results on Google
+        search_input = self._browser.find_element_by_name('q')
+        search_input.send_keys('site:rocketreach.co/ AND ' + self.company_name + ' AND email format')
+        search_input.send_keys(Keys.RETURN)
+
+        # Go to first result
+        search_results = self._browser.find_element_by_xpath('//*[@class="r"]/a[1]')
+        link = search_results.get_attribute('href')
+        self._browser.get(link)
+        return ''
+
+
 
