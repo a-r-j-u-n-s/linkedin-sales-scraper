@@ -1,5 +1,0 @@
-Please add your LinkedIn username and password below (DO NOT REFORMAT THIS FILE):
-linkedin_username: arjunsrivastava01@gmail.com
-linkedin_password: arjunator2
-salesnavigator_username: simonds08@gmail.com
-salesnavigator_password: zackisthebest1
