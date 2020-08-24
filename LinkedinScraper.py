@@ -24,8 +24,8 @@ class LinkedinScraper:
         """
         self.company_name = company_name
         self.count = count
-        self.keywords = keywords
-        self.to_ignore = to_ignore
+        self.keywords = keywords  # MAKE LOWERCASE
+        self.to_ignore = to_ignore  # MAKE LOWERCASE
         self._results = pd.DataFrame(
             columns=['First Name', 'Last Name', 'Title', 'Company', 'Location'])  # .csv file for results
 
@@ -110,9 +110,15 @@ class LinkedinScraper:
         location = info_loc[1].find_next('li').text.strip()  # Location
 
         # Create and append new data to .csv
-        account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
-                                    columns=self._results.columns)
-        self._results = self._results.append(account_info, True)
+        job_title = job_info[0].split()  # MAKE LOWERCASE
+        good_title = True  # There must be a better way to do this
+        for keyword in self.to_ignore:
+            if keyword in job_title:
+                good_title = False
+        if good_title:
+            account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
+                                        columns=self._results.columns)
+            self._results = self._results.append(account_info, True)
 
         # Save profile information to .csv file
         self._results.to_csv('accounts_scrape.csv')
@@ -136,13 +142,23 @@ class LinkedinScraper:
 
         # Find email format w highest percentage
         time.sleep(6)
-        src = self._browser.page_sourceS
+        src = self._browser.page_source
         soup = BeautifulSoup(src, 'lxml')
 
         info_div = soup.find(name='div', attrs={'class': 'table-wpr gutter-padding'})
         info_table = info_div.find('table', {'class': 'table table-bordered'})
 
-        print(soup.find('table', {'class': 'table table-bordered'}).find_all('tr'))
+        print(soup.find('table', {'class': 'table table-bordered'}).find_all('tr'))  # WIP
+
+        # Interpret email format
+
+    def _interpret_format(self, format: str):
+        """
+        Inteprets given email format
+        :param format: str of email format
+        :return:
+        """
+        pass
 
 
 
