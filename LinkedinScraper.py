@@ -120,7 +120,7 @@ class LinkedinScraper:
     def guess_email_format(self):
         """
         Guesses the email format of the given company based on Rocketreach results
-        :return: email format
+        :return: email format str
         """
         self._browser.get('https://www.google.com/')
 
@@ -133,7 +133,16 @@ class LinkedinScraper:
         search_results = self._browser.find_element_by_xpath('//*[@class="r"]/a[1]')
         link = search_results.get_attribute('href')
         self._browser.get(link)
-        return 'None'
+
+        # Find email format w highest percentage
+        time.sleep(6)
+        src = self._browser.page_sourceS
+        soup = BeautifulSoup(src, 'lxml')
+
+        info_div = soup.find(name='div', attrs={'class': 'table-wpr gutter-padding'})
+        info_table = info_div.find('table', {'class': 'table table-bordered'})
+
+        print(soup.find('table', {'class': 'table table-bordered'}).find_all('tr'))
 
 
 
