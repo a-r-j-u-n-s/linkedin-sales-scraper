@@ -2,7 +2,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import pandas as pd
-import requests, time, lxml, csv
+import requests, time, lxml, csv, re
 from bs4 import BeautifulSoup
 from utils import NonEmployeeException, Employee, EmailError
 
@@ -30,7 +30,7 @@ class LinkedinScraper:
         self.keywords = keywords  # MAKE LOWERCASE
         self.to_ignore = to_ignore  # MAKE LOWERCASE
         self._results = pd.DataFrame(
-            columns=['First Name', 'Last Name', 'Title', 'Company', 'Location'])  # .csv file for results
+            columns=['First Name', 'Last Name', 'Title', 'Company', 'Location', 'Email'])  # .csv file for results
 
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
@@ -39,7 +39,6 @@ class LinkedinScraper:
         # If guess_email, find email format
         if guess_email:
             self._email_format = self.guess_email_format()
-            print(self._email_format)
         else:
             self._email_format = None
 
@@ -88,7 +87,7 @@ class LinkedinScraper:
         # self.browser.get(link)
 
         # Scrape individual profile
-        self.scrape_profile('https://www.linkedin.com/in/arjun-srivastava042701/')
+        self.scrape_profile('https://www.linkedin.com/in/stephensimonds/')
 
     def scrape_profile(self, link: str):
         """
@@ -118,19 +117,21 @@ class LinkedinScraper:
         employee = Employee(first_name=names[0], last_name=names[1], job_title=job_info[0], company=job_info[1],
                             location=location)
 
+        # If email format exists
+        employee_email = 'Did not guess email'  # Eventually make it try to find email or something
+        if self._email_format is not None:
+            employee_email = self._generate_email(employee)
+
         # Create and append new data to .csv
         good_title = True  # There must be a better way to do this
         for keyword in self.to_ignore:
             if keyword in job_title:
                 good_title = False
         if good_title:
-            try:
-                account_info = pd.DataFrame(data=[
-                    [employee.first_name, employee.last_name, employee.job_title, employee.company, employee.location]],
-                                            columns=self._results.columns)  # FIX THIS
-                self._results = self._results.append(account_info, True)
-            except Exception:
-                raise NonEmployeeException
+            account_info = pd.DataFrame(data=[
+                [employee.first_name, employee.last_name, employee.job_title, employee.company, employee.location,
+                 employee_email]], columns=self._results.columns)  # FIX THIS
+            self._results = self._results.append(account_info, True)
 
         # Save profile information to .csv file
         self._results.to_csv('accounts_scrape.csv')
@@ -167,10 +168,28 @@ class LinkedinScraper:
             # Interpret email format
             return self._interpret_format(format_str, company_email)
         except Exception:
-            raise EmailError
-        finally:
             print('Could not guess company email')
+            raise EmailError
 
+    def _generate_email(self, employee: Employee):
+        """
+        Generates email for an individual employee
+        :param employee: Employee
+        :return: email str
+        """
+        split_format = self._email_format.split()
+        print(split_format)
+        email_format = ''
+        regex = re.compile("[^A-Za-z0-9]")
+        for term in split_format:
+            if term in employee.email_formatting.keys():
+                email_format += employee.email_formatting[term]
+            elif term.startswith('@'):
+                email_format += term
+            else:
+                if not regex.match(term[0]):
+                    email_format += term[1]
+        return email_format
 
     @staticmethod
     def _interpret_format(format_str: str, company_email: str):
