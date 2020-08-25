@@ -21,6 +21,7 @@ class LinkedinScraper:
         :param count: max number of accounts to scrape within company
         :param keywords: key words relevant to job titles
         :param to_ignore: words to ignore in job titles
+        :param guess_email: if True, include email guesses for accounts
         """
         self.company_name = company_name
         self.count = count
@@ -145,20 +146,26 @@ class LinkedinScraper:
         src = self._browser.page_source
         soup = BeautifulSoup(src, 'lxml')
 
-        info_div = soup.find(name='div', attrs={'class': 'table-wpr gutter-padding'})
-        info_table = info_div.find('table', {'class': 'table table-bordered'})
-
-        print(soup.find('table', {'class': 'table table-bordered'}).find_all('tr'))  # WIP
+        info_div = soup.find('table', {'class': 'table table-bordered'})
+        formats = info_div.find_all('tr')
+        format_str = formats[1].find('td').text.strip()
+        company_email = None
 
         # Interpret email format
+        return self._interpret_format(format_str, company_email)
 
-    def _interpret_format(self, format: str):
+    @staticmethod
+    def _interpret_format(self, format_str: str, company_email: str):
         """
-        Inteprets given email format
-        :param format: str of email format
-        :return:
+        Interprets given email format
+        :param format_str: str of email format
+        :param company_email: email address of company
+        :return: email format
         """
-        pass
+        company_email = '@google.com'  # get email format from web page
+        # format should be in 'first last' for example
+        email_format = format_str + company_email
+        return email_format
 
 
 
