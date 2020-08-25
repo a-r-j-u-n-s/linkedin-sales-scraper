@@ -176,6 +176,6 @@ class LinkedinScraper:
         """
         # format should be 'first_inital last' for example
         company = company_email.find('@')
-        company_email = company_email[company]
+        company_email = company_email[company:len(company_email)]
         email_format = format_str + ' ' + company_email
         return email_format
