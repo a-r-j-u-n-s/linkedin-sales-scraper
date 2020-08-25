@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import requests, time, lxml, csv
 from bs4 import BeautifulSoup
-from utils import NonEmployeeException
+from utils import NonEmployeeException, Employee
 
 __all__ = ['LinkedinScraper']
 
@@ -15,6 +15,7 @@ class LinkedinScraper:
     """
     Sales web scraping bot to generate relevant leads/accounts from LinkedIn
     """
+
     def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False):
         """
         Initializes Scraper
@@ -32,7 +33,7 @@ class LinkedinScraper:
             columns=['First Name', 'Last Name', 'Title', 'Company', 'Location'])  # .csv file for results
 
         self._outfile = open("accounts_scrape.csv", "w", newline='')
-        self._csv_writer = csv.writer(self._outfile)
+        self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
         self._browser = webdriver.Chrome(ChromeDriverManager().install())  # Set up browser
 
         # If guess_email, find email format
@@ -91,7 +92,7 @@ class LinkedinScraper:
 
     def scrape_profile(self, link: str):
         """
-        Scrapes profile and adds information to results file
+        Scrapes individual profile and adds information to results file
         :param link: profile link
         """
         self._browser.get(link)
@@ -111,17 +112,22 @@ class LinkedinScraper:
         names = info_loc[0].find('li').text.strip().split()  # First and last name
         job_info = personal_info_div.find('h2').text.strip().split(' at ')  # Job title and company
         location = info_loc[1].find_next('li').text.strip()  # Location
+        job_title = job_info[0].split()  # MAKE LOWERCASE
+
+        # Create new employee
+        employee = Employee(first_name=names[0], last_name=names[1], job_title=job_info[0], company=job_info[1],
+                            location=location)
 
         # Create and append new data to .csv
-        job_title = job_info[0].split()  # MAKE LOWERCASE
         good_title = True  # There must be a better way to do this
         for keyword in self.to_ignore:
             if keyword in job_title:
                 good_title = False
         if good_title:
             try:
-                account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
-                                            columns=self._results.columns)
+                account_info = pd.DataFrame(data=[
+                    [employee.first_name, employee.last_name, employee.job_title, employee.company, employee.location]],
+                                            columns=self._results.columns)  # FIX THIS
                 self._results = self._results.append(account_info, True)
             except Exception:
                 raise NonEmployeeException
@@ -153,8 +159,9 @@ class LinkedinScraper:
 
         info_div = soup.find('table', {'class': 'table table-bordered'})
         formats = info_div.find_all('tr')
-        format_str = formats[1].find_all('td')[0].text.strip()  # name format
-        company_email = formats[1].find_all('td')[1].text.strip()  # email format
+        format_str = formats[1].find_all('td')[0].text.strip()  # Name format
+        company_email = formats[1].find_all('td')[1].text.strip()  # Email format
+        percentage = formats[1].find_all('td')[2].text.strip()
 
         # Interpret email format
         return self._interpret_format(format_str, company_email)
@@ -167,10 +174,8 @@ class LinkedinScraper:
         :param company_email: email address of company
         :return: email format
         """
-        company_email = '@google.com'  # get email format from web page
-        # format should be in 'first last' for example
-        email_format = format_str + company_email
+        # format should be 'first_inital last' for example
+        company = company_email.find('@')
+        company_email = company_email[company]
+        email_format = format_str + ' ' + company_email
         return email_format
-
-
-
