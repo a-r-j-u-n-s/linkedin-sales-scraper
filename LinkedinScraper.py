@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import requests, time, lxml, csv
 from bs4 import BeautifulSoup
-from utils import NonEmployeeException, Employee
+from utils import NonEmployeeException, Employee, EmailError
 
 __all__ = ['LinkedinScraper']
 
@@ -157,14 +157,20 @@ class LinkedinScraper:
         src = self._browser.page_source
         soup = BeautifulSoup(src, 'lxml')
 
-        info_div = soup.find('table', {'class': 'table table-bordered'})
-        formats = info_div.find_all('tr')
-        format_str = formats[1].find_all('td')[0].text.strip()  # Name format
-        company_email = formats[1].find_all('td')[1].text.strip()  # Email format
-        percentage = formats[1].find_all('td')[2].text.strip()
+        try:
+            info_div = soup.find('table', {'class': 'table table-bordered'})
+            formats = info_div.find_all('tr')
+            format_str = formats[1].find_all('td')[0].text.strip()  # Name format
+            company_email = formats[1].find_all('td')[1].text.strip()  # Email format
+            percentage = formats[1].find_all('td')[2].text.strip()
 
-        # Interpret email format
-        return self._interpret_format(format_str, company_email)
+            # Interpret email format
+            return self._interpret_format(format_str, company_email)
+        except Exception:
+            raise EmailError
+        finally:
+            print('Could not guess company email')
+
 
     @staticmethod
     def _interpret_format(format_str: str, company_email: str):

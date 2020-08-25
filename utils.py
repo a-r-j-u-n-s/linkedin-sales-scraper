@@ -4,6 +4,12 @@ class NonEmployeeException(Exception):
     """
     pass
 
+class EmailError(Exception):
+    """
+    Raised if email data cannot be accessed
+    """
+    pass
+
 
 class Employee:
     """
