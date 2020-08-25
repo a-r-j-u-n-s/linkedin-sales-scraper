@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import requests, time, lxml, csv
 from bs4 import BeautifulSoup
+from utils import NonEmployeeException
 
 __all__ = ['LinkedinScraper']
 
@@ -37,6 +38,7 @@ class LinkedinScraper:
         # If guess_email, find email format
         if guess_email:
             self._email_format = self.guess_email_format()
+            print(self._email_format)
         else:
             self._email_format = None
 
@@ -85,7 +87,7 @@ class LinkedinScraper:
         # self.browser.get(link)
 
         # Scrape individual profile
-        self.scrape_profile('https://www.linkedin.com/in/ravina-dalamal-mirapuri-6b83a16/')
+        self.scrape_profile('https://www.linkedin.com/in/arjun-srivastava042701/')
 
     def scrape_profile(self, link: str):
         """
@@ -117,9 +119,12 @@ class LinkedinScraper:
             if keyword in job_title:
                 good_title = False
         if good_title:
-            account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
-                                        columns=self._results.columns)
-            self._results = self._results.append(account_info, True)
+            try:
+                account_info = pd.DataFrame(data=[[names[0], names[1], job_info[0], job_info[1], location]],
+                                            columns=self._results.columns)
+                self._results = self._results.append(account_info, True)
+            except Exception:
+                raise NonEmployeeException
 
         # Save profile information to .csv file
         self._results.to_csv('accounts_scrape.csv')
@@ -148,14 +153,14 @@ class LinkedinScraper:
 
         info_div = soup.find('table', {'class': 'table table-bordered'})
         formats = info_div.find_all('tr')
-        format_str = formats[1].find('td').text.strip()
-        company_email = None
+        format_str = formats[1].find_all('td')[0].text.strip()  # name format
+        company_email = formats[1].find_all('td')[1].text.strip()  # email format
 
         # Interpret email format
         return self._interpret_format(format_str, company_email)
 
     @staticmethod
-    def _interpret_format(self, format_str: str, company_email: str):
+    def _interpret_format(format_str: str, company_email: str):
         """
         Interprets given email format
         :param format_str: str of email format
