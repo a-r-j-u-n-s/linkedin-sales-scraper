@@ -9,7 +9,7 @@ from utils import NonEmployeeException, Employee, EmailError
 __all__ = ['LinkedinScraper']
 
 
-# TODO: IMPLEMENT SALES NAV, fix middle name
+# TODO: IMPLEMENT SALES NAV, fix middle name situation
 
 class LinkedinScraper:
     """
@@ -87,7 +87,9 @@ class LinkedinScraper:
         # self.browser.get(link)
 
         # Scrape individual profile
-        self.scrape_profile('https://www.linkedin.com/in/stephensimonds/')
+        while len(self._results) <= self.count:
+
+            self.scrape_profile('https://www.linkedin.com/in/arjun-srivastava042701/')
 
     def scrape_profile(self, link: str):
         """
@@ -106,6 +108,7 @@ class LinkedinScraper:
         soup = BeautifulSoup(src, 'lxml')
 
         # Get personal info
+        full_info_div = soup.find(name='div', attrs={'class': 'display-flex mt2'})
         personal_info_div = soup.find(name='div', attrs={'class': 'flex-1 mr5'})
         info_loc = personal_info_div.find_all(name='ul')
         names = info_loc[0].find('li').text.strip().split()  # First and last name
@@ -113,8 +116,15 @@ class LinkedinScraper:
         location = info_loc[1].find_next('li').text.strip()  # Location
         job_title = job_info[0].split()  # MAKE LOWERCASE
 
+        # Get company name
+        company_ul = full_info_div.find('ul', {'class': 'pv-top-card--experience-list'})
+        company_name = company_ul.find('span', {
+            'class': 'text-align-left ml2 t-14 t-black t-bold full-width lt-line-clamp lt-line-clamp--multi-line ember-view'}).text.strip()
+
+        # NOTE: Company name stored in two places: job_info[1] and company_name
+
         # Create new employee
-        employee = Employee(first_name=names[0], last_name=names[1], job_title=job_info[0], company=job_info[1],
+        employee = Employee(first_name=names[0], last_name=names[1], job_title=job_info[0], company=company_name,
                             location=location)
 
         # If email format exists
@@ -178,7 +188,6 @@ class LinkedinScraper:
         :return: email str
         """
         split_format = self._email_format.split()
-        print(split_format)
         email_format = ''
         regex = re.compile("[^A-Za-z0-9]")
         for term in split_format:

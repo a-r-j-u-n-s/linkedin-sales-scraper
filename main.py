@@ -2,7 +2,7 @@ from LinkedinScraper import LinkedinScraper
 
 
 def main():
-    scraper = LinkedinScraper('microsoft', 10, [], [], guess_email=True)
+    scraper = LinkedinScraper('Amazon', 1, [], [], guess_email=True)
     scraper.run()
 
 
