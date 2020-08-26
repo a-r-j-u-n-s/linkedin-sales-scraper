@@ -5,6 +5,7 @@ import pandas as pd
 import requests, time, lxml, csv, re
 from bs4 import BeautifulSoup
 from utils import NonEmployeeException, Employee, EmailError
+from selenium.webdriver.chrome.options import Options
 
 __all__ = ['LinkedinScraper']
 
@@ -16,7 +17,7 @@ class LinkedinScraper:
     Sales web scraping bot to generate relevant leads/accounts from LinkedIn
     """
 
-    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False):
+    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False, headless=False):
         """
         Initializes Scraper
         :param company_name: Company in which to search
@@ -34,7 +35,12 @@ class LinkedinScraper:
 
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
-        self._browser = webdriver.Chrome(ChromeDriverManager().install())  # Set up browser
+
+        # Headless
+        options = Options()
+        if headless:
+            options.add_argument('--headless')
+        self._browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Set up browser (fix chromedriver)
 
         # If guess_email, find email format
         if guess_email:
@@ -88,8 +94,7 @@ class LinkedinScraper:
 
         # Scrape individual profile
         while len(self._results) <= self.count:
-
-            self.scrape_profile('https://www.linkedin.com/in/arjun-srivastava042701/')
+            self.scrape_profile('https://www.linkedin.com/in/danielqiang/')
 
     def scrape_profile(self, link: str):
         """

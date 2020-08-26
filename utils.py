@@ -3,14 +3,12 @@ class NonEmployeeException(Exception):
     Raised if it is likely that the given profile is somehow not actually a valid employee with a job title
     Ex: User's 'job title' is 'Student'
     """
-    pass
 
 
 class EmailError(Exception):
     """
     Raised if email data cannot be accessed
     """
-    pass
 
 
 class Employee:
@@ -27,3 +25,4 @@ class Employee:
         # Based on Rocketreach email formatting (subject to change if Rocketreach goes down)
         self.email_formatting = {'first_initial': self.first_name[0].lower(), 'first': self.first_name.lower(),
                                  'last': self.last_name.lower(), 'last_initial': self.last_name[0].lower()}
+
