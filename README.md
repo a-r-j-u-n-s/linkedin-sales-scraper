@@ -1,7 +1,7 @@
 # linkedin-sales-scraper
 **LinkedinScraper** is a sales web scraping bot that generates relevant leads/accounts for companies of your choice based on data from [LinkedIn](https://www.linkedin.com/feed/) and saves the results to a .csv file. This bot can also guess the email addresses of leads based on data from [Rocketreach](https://rocketreach.co/)
 
-[My LinkedIn](https://www.linkedin.com/in/arjun-srivastava042701/)
+[LinkedIn](https://www.linkedin.com/in/arjun-srivastava042701/)
 
 
 ## Dependencies
@@ -17,6 +17,9 @@
 Still in testing
 
 
+## Author
+
+* **Arjun Srivastava** - [LinkedIn](https://www.linkedin.com/in/arjun-srivastava042701/)
 
 
 
