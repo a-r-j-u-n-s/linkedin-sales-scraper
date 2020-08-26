@@ -28,8 +28,8 @@ class LinkedinScraper:
         """
         self.company_name = company_name
         self.count = count
-        self.keywords = keywords  # MAKE LOWERCASE
-        self.to_ignore = to_ignore  # MAKE LOWERCASE
+        self.keywords = [word.lower() for word in keywords]
+        self.to_ignore = [word.lower() for word in to_ignore]
         self._results = pd.DataFrame(
             columns=['First Name', 'Last Name', 'Title', 'Company', 'Location', 'Email'])  # .csv file for results
 
@@ -119,8 +119,8 @@ class LinkedinScraper:
         info_loc = personal_info_div.find_all(name='ul')
         names = info_loc[0].find('li').text.strip().split()  # First and last name
         job_info = personal_info_div.find('h2').text.strip().split(' at ')  # Job title and company
-        location = info_loc[1].find_next('li').text.strip()  # Location
-        job_title = job_info[0].split()  # MAKE LOWERCASE
+        location = info_loc[1].find_next('li').text.strip()
+        job_title = job_info[0].split()
 
         # Get company name
         company_ul = full_info_div.find('ul', {'class': 'pv-top-card--experience-list'})
@@ -134,12 +134,13 @@ class LinkedinScraper:
                             location=location)
 
         # If email format exists
-        employee_email = 'Did not guess email'  # Eventually make it try to find email or something
+        employee_email = 'Did not guess email'
         if self._email_format is not None:
             employee_email = self._generate_email(employee)
 
         # Create and append new data to .csv
-        good_title = all(keyword not in job_title
+        job_title_lower = [word.lower() for word in job_title]
+        good_title = all(keyword not in job_title_lower
                          for keyword in self.to_ignore)
 
         if good_title:
