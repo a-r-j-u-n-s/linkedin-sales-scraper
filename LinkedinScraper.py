@@ -36,10 +36,11 @@ class LinkedinScraper:
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
 
-        # Headless
+        # Headless option DOES NOT WORK CURRENTLY
         options = Options()
         if headless:
             options.add_argument('--headless')
+            options.add_argument('window-size=1200,1100')
         self._browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Set up browser (fix chromedriver)
 
         # If guess_email, find email format
@@ -93,7 +94,7 @@ class LinkedinScraper:
         # self.browser.get(link)
 
         # Scrape individual profile
-        while len(self._results) <= self.count:
+        while len(self._results) < self.count:
             self.scrape_profile('https://www.linkedin.com/in/danielqiang/')
 
     def scrape_profile(self, link: str):
@@ -173,6 +174,7 @@ class LinkedinScraper:
         soup = BeautifulSoup(src, 'lxml')
 
         try:
+
             info_div = soup.find('table', {'class': 'table table-bordered'})
             formats = info_div.find_all('tr')
             format_str = formats[1].find_all('td')[0].text.strip()  # Name format
