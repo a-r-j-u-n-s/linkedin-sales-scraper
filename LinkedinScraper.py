@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 __all__ = ['LinkedinScraper']
 
 
-# TODO: IMPLEMENT SALES NAV, fix middle name situation
+# TODO: USER AGENT, IMPLEMENT SALES NAV, fix middle name situation
 
 class LinkedinScraper:
     """
@@ -138,10 +138,9 @@ class LinkedinScraper:
             employee_email = self._generate_email(employee)
 
         # Create and append new data to .csv
-        good_title = True  # There must be a better way to do this
-        for keyword in self.to_ignore:
-            if keyword in job_title:
-                good_title = False
+        good_title = all(keyword not in job_title
+                         for keyword in self.to_ignore)
+
         if good_title:
             account_info = pd.DataFrame(data=[
                 [employee.first_name, employee.last_name, employee.job_title, employee.company, employee.location,
