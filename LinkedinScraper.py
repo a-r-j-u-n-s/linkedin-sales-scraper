@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 __all__ = ['LinkedinScraper']
 
 
-# TODO: USER AGENT, IMPLEMENT SALES NAV, fix middle name situation
+# TODO: IMPLEMENT LINKEDIN API, SALES NAV, fix middle name situation
 
 class LinkedinScraper:
     """
@@ -36,11 +36,21 @@ class LinkedinScraper:
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
 
-        # Headless option DOES NOT WORK CURRENTLY
+        # Retrieves username and password from config.txt
+        config = open('config.txt')
+        lines = config.readlines()
+        self.username = lines[1].split(':')[1]
+        self.password = lines[2].split(':')[1]
+
+        # Set User Agent TODO: FIX GOOGLE SEARCH RESULTS
         options = Options()
+        # user_agent = lines[6].split()[1]
+        # options.add_argument('user-agent=' + user_agent)
+        config.close()
+
+        # Headless option DOES NOT WORK CURRENTLY
         if headless:
             options.add_argument('--headless')
-            options.add_argument('window-size=1200,1100')
         self._browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Set up browser (fix chromedriver)
 
         # If guess_email, find email format
@@ -57,18 +67,11 @@ class LinkedinScraper:
         # Get login page
         self._browser.get('https://www.linkedin.com/uas/login')
 
-        # Retrieves username and password from config.txt
-        config = open('config.txt')
-        lines = config.readlines()
-        username = lines[1].split(':')[1]
-        password = lines[2].split(':')[1]
-        config.close()
-
         # Submits username and password keys
         element_id = self._browser.find_element_by_id('username')  # Using username input id
-        element_id.send_keys(username)
+        element_id.send_keys(self.username)
         element_id = self._browser.find_element_by_id('password')  # Using password input id
-        element_id.send_keys(password)
+        element_id.send_keys(self.password)
 
         # element_id.submit()  CAUSES STALE ELEMENT ERROR
 
@@ -130,7 +133,7 @@ class LinkedinScraper:
         # NOTE: Company name stored in two places: job_info[1] and company_name
 
         # Create new employee
-        employee = Employee(first_name=names[0], last_name=names[1], job_title=job_info[0], company=company_name,
+        employee = Employee(first_name=names[0], last_name=names[len(names)-1], job_title=job_info[0], company=company_name,
                             location=location)
 
         # If email format exists
@@ -175,12 +178,12 @@ class LinkedinScraper:
         soup = BeautifulSoup(src, 'lxml')
 
         try:
-
             info_div = soup.find('table', {'class': 'table table-bordered'})
             formats = info_div.find_all('tr')
             format_str = formats[1].find_all('td')[0].text.strip()  # Name format
             company_email = formats[1].find_all('td')[1].text.strip()  # Email format
             percentage = formats[1].find_all('td')[2].text.strip()
+            self._results = self._results.rename(columns={'Email': 'Email (accuracy: ' + percentage + ')'})
 
             # Interpret email format
             return self._interpret_format(format_str, company_email)
