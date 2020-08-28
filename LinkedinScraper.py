@@ -98,7 +98,7 @@ class LinkedinScraper:
 
         # Scrape individual profile
         while len(self._results) < self.count:
-            self.scrape_profile('https://www.linkedin.com/in/danielqiang/')
+            self.scrape_profile('https://www.linkedin.com/in/gabrielle-sprunck-ba0312184/')
 
     def scrape_profile(self, link: str):
         """
