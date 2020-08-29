@@ -35,6 +35,7 @@ class LinkedinScraper:
 
         self._outfile = open("accounts_scrape.csv", "w", newline='')
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
+        self._scraped = set()  # List of saved account urls
 
         # Retrieves username and password from config.txt
         config = open('config.txt')
@@ -98,7 +99,9 @@ class LinkedinScraper:
 
         # Scrape individual profile
         while len(self._results) < self.count:
-            self.scrape_profile('https://www.linkedin.com/in/gabrielle-sprunck-ba0312184/')
+            link = 'https://www.linkedin.com/in/gabrielle-sprunck-ba0312184/'
+            if link not in self._scraped:
+                self.scrape_profile(link)
 
     def scrape_profile(self, link: str):
         """
@@ -106,6 +109,7 @@ class LinkedinScraper:
         :param link: profile link
         """
         self._browser.get(link)
+        self._scraped.add(link)
 
         height = self._browser.execute_script("return document.documentElement.scrollHeight")  # Maybe use body?
 
