@@ -7,6 +7,10 @@ from bs4 import BeautifulSoup
 from utils import NonEmployeeException, Employee, EmailError
 from selenium.webdriver.chrome.options import Options
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
 __all__ = ['LinkedinScraper']
 
 
@@ -49,7 +53,7 @@ class LinkedinScraper:
         # options.add_argument('user-agent=' + user_agent)
         config.close()
 
-        # Headless option DOES NOT WORK CURRENTLY
+        # Headless option DOES NOT WORK FOR ROCKETREACH
         if headless:
             options.add_argument('--headless')
         self._browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Set up browser (fix chromedriver)
@@ -92,14 +96,16 @@ class LinkedinScraper:
         self._browser.find_element_by_css_selector(
             "button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
 
-        # time.sleep(5)
-        # result = self.browser.find_element_by_class_name('search-result__result-link ember-view')  # Finds first search result (MAKE MORE EFFECTIVE)
+        time.sleep(5)
+        WebDriverWait(self._browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ember917")))
+        WebDriverWait(self._browser, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "search-result__info pt3 pb4 pr0")))
+        result = self._browser.find_element_by_class_name('search-result__info pt3 pb4 pr0')  # Finds first search result (MAKE MORE EFFECTIVE)
         # link = result.get_attribute('href')
-        # self.browser.get(link)
+        print(result)
 
         # Scrape individual profile
         while len(self._results) < self.count:
-            link = 'https://www.linkedin.com/in/gabrielle-sprunck-ba0312184/'
+            link = 'https://www.linkedin.com/in/maya-weber-9757a4152/'
             if link not in self._scraped:
                 self.scrape_profile(link)
 
