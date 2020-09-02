@@ -94,6 +94,7 @@ class LinkedinScraper:
         Access employees of chosen company
         """
         # Initial search
+        time.sleep(3)
         search = self._browser.find_element_by_xpath("//input[@aria-label='Search']")  # Find elem w search bar xpath
         search.send_keys(self.company_name)
         self._browser.find_element_by_css_selector(
