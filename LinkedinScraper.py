@@ -21,19 +21,22 @@ class LinkedinScraper:
     Sales web scraping bot to generate relevant leads/accounts from LinkedIn
     """
 
-    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False, headless=False):
+    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False, headless=False, link_scrape=False):
         """
         Initializes Scraper
-        :param company_name: Company in which to search
+        :param company_name: company in which to search
         :param count: max number of accounts to scrape within company
         :param keywords: key words relevant to job titles
         :param to_ignore: words to ignore in job titles
         :param guess_email: if True, include email guesses for accounts
+        :param headless: if True, will run a headless instance of Chrome
+        :param link_scrape: if True, will manually scrape list of profile links from 'links.txt'
         """
         self.company_name = company_name
         self.count = count
         self.keywords = [word.lower() for word in keywords]
         self.to_ignore = [word.lower() for word in to_ignore]
+        self.link_scrape = link_scrape
         self._results = pd.DataFrame(
             columns=['First Name', 'Last Name', 'Title', 'Company', 'Location', 'Email'])  # .csv file for results
 
@@ -96,18 +99,27 @@ class LinkedinScraper:
         self._browser.find_element_by_css_selector(
             "button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
 
-        time.sleep(5)
-        WebDriverWait(self._browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ember917")))
-        WebDriverWait(self._browser, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "search-result__info pt3 pb4 pr0")))
-        result = self._browser.find_element_by_class_name('search-result__info pt3 pb4 pr0')  # Finds first search result (MAKE MORE EFFECTIVE)
-        # link = result.get_attribute('href')
-        print(result)
+        # time.sleep(5)
+        # WebDriverWait(self._browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ember917")))
+        # WebDriverWait(self._browser, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "search-result__info pt3 pb4 pr0")))
+        # result = self._browser.find_element_by_class_name('search-result__info pt3 pb4 pr0')  # Finds first search result (MAKE MORE EFFECTIVE)
+        # # link = result.get_attribute('href')
+        # print(result)
 
-        # Scrape individual profile
-        while len(self._results) < self.count:
-            link = 'https://www.linkedin.com/in/maya-weber-9757a4152/'
-            if link not in self._scraped:
-                self.scrape_profile(link)
+        # Manual link scraping option
+        if self.link_scrape:
+            with open('links.txt') as link_file:
+                links = link_file.readlines()
+                iter_links = iter(links)
+                next(iter_links)
+                for link in iter_links:
+                    self.scrape_profile(link)
+        else:
+            # TODO: IMPLEMENT ACTUAL SEARCH
+            while len(self._results) < self.count:
+                link = 'https://www.linkedin.com/in/maya-weber-9757a4152/'
+                if link not in self._scraped:
+                    self.scrape_profile(link)
 
     def scrape_profile(self, link: str):
         """

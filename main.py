@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def main():
-    scraper = LinkedinScraper('Guidehouse', 1, [], [], guess_email=False)
+    scraper = LinkedinScraper('Guidehouse', 1, [], [], guess_email=True)
     scraper.run()
 
     # REDUNTANT: SCRAPE RESULTS SALESFORCE SCRIPT
