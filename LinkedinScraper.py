@@ -114,7 +114,8 @@ class LinkedinScraper:
                 iter_links = iter(links)
                 next(iter_links)
                 for link in iter_links:
-                    self.scrape_profile(link)
+                    if link not in self._scraped:
+                        self.scrape_profile(link)
         else:
             # TODO: IMPLEMENT ACTUAL SEARCH
             while len(self._results) < self.count:
