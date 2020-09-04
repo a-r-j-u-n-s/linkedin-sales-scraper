@@ -4,14 +4,12 @@ import pandas as pd
 
 
 def main():
-    scraper = LinkedinScraper('M&T Bank', 1, [], [], guess_email=True, link_scrape=True)
+    scraper = LinkedinScraper('New York Community Bank', 1, [], [], guess_email=True, link_scrape=True)
     scraper.run()
 
-    # REDUNTANT: SCRAPE RESULTS SALESFORCE SCRIPT
+    # SCRAPE RESULTS SALESFORCE DROP SCRIPT
     # salesforce_accounts = pd.read_csv('testing/salesforce_accounts.csv')
-    # my_accounts = pd.read_csv('testing/accounts_masterlist_to_edit.csv')
-    # my_accounts['Record Owner'] = 'Personetics Marketing'
-    # my_accounts['Original UTM'] = 'Outbound'
+    # my_accounts = pd.read_csv('testing/accounts.csv')
     # print(my_accounts, '=' * 100, sep='\n')
     #
     # accounts = my_accounts[['First Name', 'Last Name', 'Company']]
@@ -25,7 +23,7 @@ def main():
     # my_accounts = my_accounts.drop(index=indices)
     # print(my_accounts)
     #
-    # my_accounts.to_csv('testing/accounts.csv')
+    # my_accounts.to_csv('testing/accounts_updated.csv')
 
 
 if __name__ == '__main__':
