@@ -12,6 +12,16 @@
 
 ## Features
 
+`link_scrape`: *Scraping a list of LinkedIn Profiles*
+
+- Set this option to `True` to utilize link scraping mode
+- Open links.txt and paste desired profile
+- Run; results saved to accounts_scrape.csv
+
+`guess_email`: *Using Rocketreach to guess leads' company emails*
+
+- Set this option to `True` to enable email guessing
+- Bot will access [Rocketreac](rocketreach.co) to generate an email guess (with a displayed accuracy) for all scrape reesults
 
 ## Usage
 
