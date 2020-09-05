@@ -22,6 +22,7 @@
 
 - Set this option to `True` to enable email guessing
 - Bot will access [Rocketreac](rocketreach.co) to generate an email guess (with a displayed accuracy) for all scrape reesults
+- Results will be included in accounts_scrape.csv
 
 ## Usage
 
