@@ -10,7 +10,7 @@
 [Requests](https://pypi.org/project/requests/) (not currently in use),
 [Pandas](https://pandas.pydata.org/)
 
-## Features
+## Features and Options
 
 `link_scrape`: *Scraping a list of LinkedIn Profiles*
 
@@ -26,7 +26,7 @@
 
 ## Usage
 
-Still in testing
+Still in development
 
 
 ## Author
