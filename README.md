@@ -10,12 +10,23 @@
 [Requests](https://pypi.org/project/requests/) (not currently in use),
 [Pandas](https://pandas.pydata.org/)
 
-## Features
+## Features and Options
 
+`link_scrape`: *Scraping a list of LinkedIn Profiles*
+
+- Set this option to `True` to utilize link scraping mode
+- Open links.txt and paste desired profile
+- Run; results saved to accounts_scrape.csv
+
+`guess_email`: *Using Rocketreach to guess leads' company emails*
+
+- Set this option to `True` to enable email guessing
+- Bot will access [Rocketreach](rocketreach.co) to generate an email guess (with a displayed accuracy) for all scrape reesults
+- Results will be included in accounts_scrape.csv
 
 ## Usage
 
-Still in testing
+Still in development
 
 
 ## Author
