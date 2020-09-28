@@ -7,21 +7,28 @@ from bs4 import BeautifulSoup
 from utils import NonEmployeeException, Employee, EmailError
 from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
-__all__ = ['LinkedinScraper']
+__all__ = ["LinkedinScraper"]
 
 
 # TODO: IMPLEMENT LINKEDIN API, SALES NAV, fix middle name situation
+
 
 class LinkedinScraper:
     """
     Sales web scraping bot to generate relevant leads/accounts from LinkedIn
     """
 
-    def __init__(self, company_name: str, count: int, keywords: list, to_ignore: list, guess_email=False, headless=False, link_scrape=False):
+    def __init__(
+        self,
+        company_name: str,
+        count: int,
+        keywords: list,
+        to_ignore: list,
+        guess_email=False,
+        headless=False,
+        link_scrape=False,
+    ):
         """
         Initializes Scraper
         :param company_name: company in which to search
@@ -38,17 +45,18 @@ class LinkedinScraper:
         self.to_ignore = [word.lower() for word in to_ignore]
         self.link_scrape = link_scrape
         self._results = pd.DataFrame(
-            columns=['First Name', 'Last Name', 'Title', 'Company', 'Location', 'Email'])  # .csv file for results
+            columns=["First Name", "Last Name", "Title", "Company", "Location", "Email"]
+        )  # .csv file for results
 
-        self._outfile = open("accounts_scrape.csv", "w", newline='')
+        self._outfile = open("accounts_scrape.csv", "w", newline="")
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
         self._scraped = set()  # List of saved account urls
 
         # Retrieves username and password from config.txt
-        config = open('config.txt')
+        config = open("config.txt")
         lines = config.readlines()
-        self.username = lines[1].split(':')[1]
-        self.password = lines[2].split(':')[1]
+        self.username = lines[1].split(":")[1]
+        self.password = lines[2].split(":")[1]
 
         # Set User Agent TODO: FIX GOOGLE SEARCH RESULTS
         options = Options()
@@ -58,8 +66,10 @@ class LinkedinScraper:
 
         # Headless option DOES NOT WORK FOR ROCKETREACH
         if headless:
-            options.add_argument('--headless')
-        self._browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Set up browser (fix chromedriver)
+            options.add_argument("--headless")
+        self._browser = webdriver.Chrome(
+            ChromeDriverManager().install(), options=options
+        )  # Set up browser (fix chromedriver)
 
         # If guess_email, find email format
         if guess_email:
@@ -73,12 +83,16 @@ class LinkedinScraper:
         :return:
         """
         # Get login page
-        self._browser.get('https://www.linkedin.com/uas/login')
+        self._browser.get("https://www.linkedin.com/uas/login")
 
         # Submits username and password keys
-        element_id = self._browser.find_element_by_id('username')  # Using username input id
+        element_id = self._browser.find_element_by_id(
+            "username"
+        )  # Using username input id
         element_id.send_keys(self.username)
-        element_id = self._browser.find_element_by_id('password')  # Using password input id
+        element_id = self._browser.find_element_by_id(
+            "password"
+        )  # Using password input id
         element_id.send_keys(self.password)
 
         # element_id.submit()  CAUSES STALE ELEMENT ERROR
@@ -95,10 +109,13 @@ class LinkedinScraper:
         """
         # Initial search
         time.sleep(3)
-        search = self._browser.find_element_by_xpath("//input[@aria-label='Search']")  # Find elem w search bar xpath
+        search = self._browser.find_element_by_xpath(
+            "//input[@aria-label='Search']"
+        )  # Find elem w search bar xpath
         search.send_keys(self.company_name)
         self._browser.find_element_by_css_selector(
-            "button[class='search-global-typeahead__button']").click()  # Using search BUTTON (not bar itself) class name
+            "button[class='search-global-typeahead__button']"
+        ).click()  # Using search BUTTON (not bar itself) class name
 
         # time.sleep(5)
         # WebDriverWait(self._browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ember917")))
@@ -109,17 +126,14 @@ class LinkedinScraper:
 
         # Manual link scraping option
         if self.link_scrape:
-            with open('links.txt') as link_file:
-                links = link_file.readlines()
-                iter_links = iter(links)
-                next(iter_links)
-                for link in iter_links:
+            with open("links.txt") as link_file:
+                for link in link_file.readlines():
                     if link not in self._scraped and link:
                         self.scrape_profile(link)
         else:
             # TODO: IMPLEMENT ACTUAL SEARCH
             while len(self._results) < self.count:
-                link = 'https://www.linkedin.com/in/maya-weber-9757a4152/'
+                link = "https://www.linkedin.com/in/maya-weber-9757a4152/"
                 if link not in self._scraped:
                     self.scrape_profile(link)
 
@@ -131,88 +145,116 @@ class LinkedinScraper:
         self._browser.get(link)
         self._scraped.add(link)
 
-        height = self._browser.execute_script("return document.documentElement.scrollHeight")  # Maybe use body?
+        height = self._browser.execute_script(
+            "return document.documentElement.scrollHeight"
+        )  # Maybe use body?
 
         self._browser.execute_script(
-            "window.scrollTo(0, document.documentElement.scrollHeight);")  # Scrolls to bottom of page
+            "window.scrollTo(0, document.documentElement.scrollHeight);"
+        )  # Scrolls to bottom of page
 
         # Parse with BeautifulSoup and lxml
         src = self._browser.page_source
-        soup = BeautifulSoup(src, 'lxml')
+        soup = BeautifulSoup(src, "lxml")
 
         # Get personal info
-        full_info_div = soup.find(name='div', attrs={'class': 'display-flex mt2'})
-        personal_info_div = soup.find(name='div', attrs={'class': 'flex-1 mr5'})
-        info_loc = personal_info_div.find_all(name='ul')
-        names = info_loc[0].find('li').text.strip().split()  # First and last name
-        job_info = personal_info_div.find('h2').text.strip().split(' at ')  # Job title and company
-        location = info_loc[1].find_next('li').text.strip()
+
+        full_info_div = soup.find(name="div", attrs={"class": "display-flex mt2"})
+        personal_info_div = soup.find(name="div", attrs={"class": "flex-1 mr5"})
+        info_loc = personal_info_div.find_all(name="ul")
+        names = info_loc[0].find("li").text.strip().split()  # First and last name
+        job_info = (
+            personal_info_div.find("h2").text.strip().split(" at ")
+        )  # Job title and company
+        location = info_loc[1].find_next("li").text.strip()
         job_title = job_info[0].split()
 
         # Get company name
-        company_ul = full_info_div.find('ul', {'class': 'pv-top-card--experience-list'})
-        company_name = company_ul.find('span', {
-            'class': 'text-align-left ml2 t-14 t-black t-bold full-width lt-line-clamp lt-line-clamp--multi-line ember-view'}).text.strip()
+        company_ul = full_info_div.find("ul", {"class": "pv-top-card--experience-list"})
+        company_name = company_ul.find(
+            "span",
+            {
+                "class": "text-align-left ml2 t-14 t-black t-bold full-width lt-line-clamp lt-line-clamp--multi-line ember-view"
+            },
+        ).text.strip()
 
         # NOTE: Company name stored in two places: job_info[1] and company_name
 
         # Create new employee
-        employee = Employee(first_name=names[0], last_name=names[len(names)-1], job_title=job_info[0], company=company_name,
-                            location=location)
+        employee = Employee(
+            first_name=names[0],
+            last_name=names[len(names) - 1],
+            job_title=job_info[0],
+            company=company_name,
+            location=location,
+        )
 
         # If email format exists
-        employee_email = 'Did not guess email'
+        employee_email = "Did not guess email"
         if self._email_format is not None:
             employee_email = self._generate_email(employee)
 
         # Create and append new data to .csv
         job_title_lower = [word.lower() for word in job_title]
-        good_title = all(keyword not in job_title_lower
-                         for keyword in self.to_ignore)
+        good_title = all(keyword not in job_title_lower for keyword in self.to_ignore)
 
         if good_title:
-            account_info = pd.DataFrame(data=[
-                [employee.first_name, employee.last_name, employee.job_title, employee.company, employee.location,
-                 employee_email]], columns=self._results.columns)  # FIX THIS
+            account_info = pd.DataFrame(
+                data=[
+                    [
+                        employee.first_name,
+                        employee.last_name,
+                        employee.job_title,
+                        employee.company,
+                        employee.location,
+                        employee_email,
+                    ]
+                ],
+                columns=self._results.columns,
+            )  # FIX THIS
             self._results = self._results.append(account_info, True)
 
         # Save profile information to .csv file
-        self._results.to_csv('accounts_scrape.csv')
+        self._results.to_csv("accounts_scrape.csv")
 
     def guess_email_format(self):
         """
         Guesses the email format of the given company based on Rocketreach results
         :return: email format str
         """
-        self._browser.get('https://www.google.com/')
+        self._browser.get("https://www.google.com/")
 
         # Search for Rocketreach results on Google
-        search_input = self._browser.find_element_by_name('q')
-        search_input.send_keys('site:rocketreach.co/ AND ' + self.company_name + ' AND email format')
+        search_input = self._browser.find_element_by_name("q")
+        search_input.send_keys(
+            "site:rocketreach.co/ AND " + self.company_name + " AND email format"
+        )
         search_input.send_keys(Keys.RETURN)
 
         # Go to first result
         search_results = self._browser.find_element_by_xpath('//*[@class="r"]/a[1]')
-        link = search_results.get_attribute('href')
+        link = search_results.get_attribute("href")
         self._browser.get(link)
 
         # Find email format w highest percentage
         time.sleep(6)
         src = self._browser.page_source
-        soup = BeautifulSoup(src, 'lxml')
+        soup = BeautifulSoup(src, "lxml")
 
         try:
-            info_div = soup.find('table', {'class': 'table table-bordered'})
-            formats = info_div.find_all('tr')
-            format_str = formats[1].find_all('td')[0].text.strip()  # Name format
-            company_email = formats[1].find_all('td')[1].text.strip()  # Email format
-            percentage = formats[1].find_all('td')[2].text.strip()
-            self._results = self._results.rename(columns={'Email': 'Email (accuracy: ' + percentage + ')'})
+            info_div = soup.find("table", {"class": "table table-bordered"})
+            formats = info_div.find_all("tr")
+            format_str = formats[1].find_all("td")[0].text.strip()  # Name format
+            company_email = formats[1].find_all("td")[1].text.strip()  # Email format
+            percentage = formats[1].find_all("td")[2].text.strip()
+            self._results = self._results.rename(
+                columns={"Email": "Email (accuracy: " + percentage + ")"}
+            )
 
             # Interpret email format
             return self._interpret_format(format_str, company_email)
         except Exception:
-            print('Could not guess company email')
+            print("Could not guess company email")
             raise EmailError
 
     def _generate_email(self, employee: Employee):
@@ -222,12 +264,12 @@ class LinkedinScraper:
         :return: email str
         """
         split_format = self._email_format.split()
-        email_format = ''
+        email_format = ""
         regex = re.compile("[^A-Za-z0-9]")
         for term in split_format:
             if term in employee.email_formatting.keys():
                 email_format += employee.email_formatting[term]
-            elif term.startswith('@'):
+            elif term.startswith("@"):
                 email_format += term
             else:
                 if not regex.match(term[0]):
@@ -243,7 +285,7 @@ class LinkedinScraper:
         :return: email format
         """
         # format should be 'first_inital last' for example
-        company = company_email.find('@')
-        company_email = company_email[company:len(company_email)]
-        email_format = format_str + ' ' + company_email
+        company = company_email.find("@")
+        company_email = company_email[company : len(company_email)]
+        email_format = format_str + " " + company_email
         return email_format
