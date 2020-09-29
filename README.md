@@ -44,12 +44,8 @@
 
 ## Usage
 
-Clone this repository and set your credentials and information in [main.py](main.py)
+Clone this repository and set your credentials and information in [main.py](main.py), then run script
 
 ## Author
 
 * **Arjun Srivastava** - [LinkedIn](https://www.linkedin.com/in/arjun-srivastava042701/)
-
-
-
-
