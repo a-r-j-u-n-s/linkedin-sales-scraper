@@ -16,14 +16,18 @@ class LinkedinScraper:
     """
     Data mining/web scraping bot to generate relevant leads/accounts from LinkedIn
     """
+
     def __init__(
             self,
+            username: str,
+            password: str,
             company_name: str,
             count: int,
             to_ignore: list,
             guess_email=False,
             headless=False,
             link_scrape=True,
+            user_agent=False
     ):
         """
         Initializes Scraper
@@ -38,6 +42,7 @@ class LinkedinScraper:
         self.count = count
         self.to_ignore = [word.lower() for word in to_ignore]
         self.link_scrape = link_scrape
+        self.user_agent = user_agent
         self._results = pd.DataFrame(
             columns=["First Name", "Last Name", "Title", "Company", "Location", "Email"]
         )  # .csv file for results
@@ -45,17 +50,17 @@ class LinkedinScraper:
         self._outfile = open("accounts_scrape.csv", "w", newline="")
         self._csv_writer = csv.writer(self._outfile)  # .csv writer to generate accounts
         self._scraped = set()  # List of saved account urls
-
-        # Retrieves username and password from config.txt
-        config = open("config.txt")
-        lines = config.readlines()
-        self.username = lines[1].split(":")[1]
-        self.password = lines[2].split(":")[1]
+        self.username = username
+        self.password = password
 
         options = Options()
-        # user_agent = lines[6].split()[1]
-        # options.add_argument('user-agent=' + user_agent) NOTE: New user agent does not work with Google Search Results
-        config.close()
+        if user_agent: # Sets user agent to user agent defined in config
+            config = open("config.txt")
+            lines = config.readlines()
+            user_agent = lines[0].split()[1]
+            options.add_argument(
+                'user-agent=' + user_agent)  # NOTE: New user agent does not work with Google Search Results
+            config.close()
 
         # Headless option NOTE: Will not work with Rocketreach!
         if headless:

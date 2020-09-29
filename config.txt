@@ -1,7 +1,1 @@
-Please add your LinkedIn username and password below (DO NOT REFORMAT THIS FILE):
-linkedin username: USER_DEFINED
-linkedin password: USER_DEFINED
-salesnavigator username: USER_DEFINED
-salesnavigator password: USER_DEFINED
-
 user_account: Mozilla/5.0 (Amiga; U; AmigaOS 1.3; en; rv:1.8.1.19) Gecko/20081204 SeaMonkey/1.1.14
