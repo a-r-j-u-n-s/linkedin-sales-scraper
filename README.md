@@ -7,8 +7,8 @@
 
 [Selenium](https://pypi.org/project/selenium/), 
 [BeautifulSoup](https://pypi.org/project/beautifulsoup4/),
-[Requests](https://pypi.org/project/requests/) (not currently in use),
 [Pandas](https://pandas.pydata.org/)
+[ChromeDriver](https://chromedriver.chromium.org/)
 
 ## Features and Options
 
