@@ -2,38 +2,33 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import pandas as pd
-import requests, time, lxml, csv, re
+import time
+import csv
+import re
 from bs4 import BeautifulSoup
 from utils import NonEmployeeException, Employee, EmailError
 from selenium.webdriver.chrome.options import Options
 
-
 __all__ = ["LinkedinScraper"]
-
-
-# TODO: IMPLEMENT LINKEDIN API, SALES NAV, fix middle name situation
 
 
 class LinkedinScraper:
     """
-    Sales web scraping bot to generate relevant leads/accounts from LinkedIn
+    Data mining/web scraping bot to generate relevant leads/accounts from LinkedIn
     """
-
     def __init__(
-        self,
-        company_name: str,
-        count: int,
-        keywords: list,
-        to_ignore: list,
-        guess_email=False,
-        headless=False,
-        link_scrape=False,
+            self,
+            company_name: str,
+            count: int,
+            to_ignore: list,
+            guess_email=False,
+            headless=False,
+            link_scrape=True,
     ):
         """
         Initializes Scraper
         :param company_name: company in which to search
         :param count: max number of accounts to scrape within company
-        :param keywords: key words relevant to job titles
         :param to_ignore: words to ignore in job titles
         :param guess_email: if True, include email guesses for accounts
         :param headless: if True, will run a headless instance of Chrome
@@ -41,7 +36,6 @@ class LinkedinScraper:
         """
         self.company_name = company_name
         self.count = count
-        self.keywords = [word.lower() for word in keywords]
         self.to_ignore = [word.lower() for word in to_ignore]
         self.link_scrape = link_scrape
         self._results = pd.DataFrame(
@@ -58,20 +52,19 @@ class LinkedinScraper:
         self.username = lines[1].split(":")[1]
         self.password = lines[2].split(":")[1]
 
-        # Set User Agent TODO: FIX GOOGLE SEARCH RESULTS
         options = Options()
         # user_agent = lines[6].split()[1]
-        # options.add_argument('user-agent=' + user_agent)
+        # options.add_argument('user-agent=' + user_agent) NOTE: New user agent does not work with Google Search Results
         config.close()
 
-        # Headless option DOES NOT WORK FOR ROCKETREACH
+        # Headless option NOTE: Will not work with Rocketreach!
         if headless:
             options.add_argument("--headless")
         self._browser = webdriver.Chrome(
             ChromeDriverManager().install(), options=options
-        )  # Set up browser (fix chromedriver)
+        )  # Set up browser (installs chromedriver)
 
-        # If guess_email, find email format
+        # If guess_email, finds email format
         if guess_email:
             self._email_format = self.guess_email_format()
         else:
@@ -117,13 +110,6 @@ class LinkedinScraper:
             "button[class='search-global-typeahead__button']"
         ).click()  # Using search BUTTON (not bar itself) class name
 
-        # time.sleep(5)
-        # WebDriverWait(self._browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.ID, "ember917")))
-        # WebDriverWait(self._browser, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "search-result__info pt3 pb4 pr0")))
-        # result = self._browser.find_element_by_class_name('search-result__info pt3 pb4 pr0')  # Finds first search result (MAKE MORE EFFECTIVE)
-        # # link = result.get_attribute('href')
-        # print(result)
-
         # Manual link scraping option
         if self.link_scrape:
             with open("links.txt") as link_file:
@@ -131,7 +117,6 @@ class LinkedinScraper:
                     if link not in self._scraped and link:
                         self.scrape_profile(link)
         else:
-            # TODO: IMPLEMENT ACTUAL SEARCH
             while len(self._results) < self.count:
                 link = "https://www.linkedin.com/in/maya-weber-9757a4152/"
                 if link not in self._scraped:
@@ -286,6 +271,34 @@ class LinkedinScraper:
         """
         # format should be 'first_inital last' for example
         company = company_email.find("@")
-        company_email = company_email[company : len(company_email)]
+        company_email = company_email[company: len(company_email)]
         email_format = format_str + " " + company_email
         return email_format
+
+    @staticmethod
+    def account_updater(my_accounts: pd.DataFrame, database_accounts: pd.DataFrame):
+        """
+        For use with SalesForce or any other database platform
+        Updates scraped DataFrame by removing rows that already exist in large database
+        :param my_accounts: DataFrame of scraped accounts
+        :param database_accounts: DataFrame of database accounts
+        :return: Downloads updated .csv to project directory
+        """
+        accounts = my_accounts[["First Name", "Last Name", "Company"]]
+        database = database_accounts[["First Name", "Last Name", "Company"]]
+
+        merged = (
+            accounts.merge(database, how="left", indicator=True)
+                .query('_merge == "both"')
+                .drop(["_merge"], axis=1)
+        )
+        with pd.option_context(
+                "display.max_rows", None, "display.max_columns", None
+        ):  # more options can be specified also
+            print(merged)
+            print(len(merged))
+        indices = merged.index
+        my_accounts = my_accounts.drop(index=indices)
+        print(my_accounts)
+
+        my_accounts.to_csv("accounts_updated.csv")
