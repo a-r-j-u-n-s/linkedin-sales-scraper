@@ -32,8 +32,7 @@
 
 ## Usage
 
-Still in development
-
+Clone this repository and set your credentials and information in [main.py](main.py)
 
 ## Author
 
