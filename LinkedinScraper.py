@@ -200,7 +200,7 @@ class LinkedinScraper:
             self._results = self._results.append(account_info, True)
 
         # Save profile information to .csv file
-        self._results.to_csv("accounts_scrape.csv")
+        self._results.to_csv("results/accounts_scrape.csv")
 
     def guess_email_format(self):
         """
@@ -301,4 +301,4 @@ class LinkedinScraper:
         my_accounts = my_accounts.drop(index=indices)
         print(my_accounts)
 
-        my_accounts.to_csv("accounts_updated.csv")
+        my_accounts.to_csv("results/accounts_updated.csv")
