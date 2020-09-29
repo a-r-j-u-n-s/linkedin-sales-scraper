@@ -14,8 +14,9 @@
 
 `link_scrape`: *Scraping a list of LinkedIn Profiles*
 
-- Set this option to `True` to utilize link scraping mode
-- Open links.txt and paste desired profile
+- Default `True`
+- Utilizes link scraping mode
+- Open links.txt and paste desired profile links
 - Run; results saved to accounts_scrape.csv
 
 `guess_email`: *Using Rocketreach to guess leads' company emails*
@@ -23,6 +24,11 @@
 - Set this option to `True` to enable email guessing
 - Bot will access [Rocketreach](rocketreach.co) to generate an email guess (with a displayed accuracy) for all scrape reesults
 - Results will be included in accounts_scrape.csv
+
+`to_ignore`:
+
+- Add keywords of job titles you would like the scraper to ignore
+- E.g. `to_ignore` = ['intern', 'software', 'operations'] -> ignores profiles with given job title keywords
 
 ## Usage
 
