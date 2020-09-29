@@ -30,6 +30,18 @@
 - Add keywords of job titles you would like the scraper to ignore
 - E.g. `to_ignore` = ['intern', 'software', 'operations'] -> ignores profiles with given job title keywords
 
+`headless`:
+
+- Runs browser in "headless" mode
+- Browser will run as a background process
+- Note: Will not work with guess_email!
+
+`user_agent`:
+
+- Checks `config.txt` for alternate user agent and uses it for web driving
+- Note: Only necessary for large scrapes of over 100 profiles
+
+
 ## Usage
 
 Clone this repository and set your credentials and information in [main.py](main.py)
